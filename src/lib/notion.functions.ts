@@ -57,7 +57,34 @@ export const getGalleryRecordMaps = createServerFn({ method: "GET" }).handler(as
     }
   }
 
-  return { galleries, idToSlug };
+  // Extrait les items de chaque galerie depuis le recordMap
+  function extractItems(recordMap: any) {
+    const collectionId = Object.keys(recordMap.collection || {})[0];
+    if (!collectionId) return [];
+    const queryData = recordMap.collection_query?.[collectionId];
+    if (!queryData) return [];
+    const viewId = Object.keys(queryData)[0];
+    const blockIds: string[] =
+      queryData[viewId]?.collection_group_results?.blockIds ||
+      queryData[viewId]?.blockIds || [];
+    return blockIds.map((blockId: string) => {
+      const block = recordMap.block?.[blockId]?.value;
+      if (!block) return null;
+      const titleArr = block?.properties?.title || [];
+      const title = titleArr.map((t: any) => (Array.isArray(t) ? t[0] : t)).join("");
+      let cover = block?.format?.page_cover || "";
+      if (cover && cover.startsWith("/")) cover = `https://www.notion.so${cover}`;
+      return { id: blockId.replace(/-/g, ""), title, cover };
+    }).filter(Boolean).filter((i: any) => i.title);
+  }
+
+  const galleriesWithItems = galleries.map((g) => ({
+    id: g.id,
+    title: g.title,
+    items: extractItems(g.recordMap),
+  }));
+
+  return galleriesWithItems;
 });
 
 export const getProjects = createServerFn({ method: "GET" }).handler(async () => {

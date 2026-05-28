@@ -1,15 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { lazy, Suspense } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { NewsletterCTA } from "@/components/site/NewsletterCTA";
 import { LogosMarquee } from "@/components/site/LogosMarquee";
 import { getGalleryRecordMaps } from "@/lib/notion.functions";
-
-const NotionPortfolio = lazy(() =>
-  import("@/components/site/NotionPortfolio").then((m) => ({ default: m.NotionPortfolio }))
-);
+import { NotionPortfolio } from "@/components/site/NotionPortfolio";
 
 export const Route = createFileRoute("/portfolio")({
   component: PortfolioPage,
@@ -36,12 +32,10 @@ export const Route = createFileRoute("/portfolio")({
 
 function PortfolioPage() {
   const fetchGalleries = useServerFn(getGalleryRecordMaps);
-  const { data, isLoading } = useQuery({
+  const { data: galleries = [], isLoading } = useQuery({
     queryKey: ["portfolio-galleries"],
     queryFn: () => fetchGalleries(),
   });
-  const galleries = data?.galleries ?? [];
-  const idToSlug = data?.idToSlug ?? {};
 
   return (
     <SiteLayout>
@@ -83,9 +77,7 @@ function PortfolioPage() {
         ) : galleries.length === 0 ? (
           <p className="px-6 text-center text-muted-foreground">Impossible de charger le portfolio.</p>
         ) : (
-          <Suspense fallback={<p className="px-6 text-center text-muted-foreground">Chargement...</p>}>
-            <NotionPortfolio galleries={galleries} idToSlug={idToSlug} />
-          </Suspense>
+          <NotionPortfolio galleries={galleries} />
         )}
       </section>
 
