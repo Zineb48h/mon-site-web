@@ -1,15 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { lazy, Suspense } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { NewsletterCTA } from "@/components/site/NewsletterCTA";
 import { LogosMarquee } from "@/components/site/LogosMarquee";
-import { getPortfolioPage } from "@/lib/notion.functions";
-
-const NotionPortfolio = lazy(() =>
-  import("@/components/site/NotionPortfolio").then((m) => ({ default: m.NotionPortfolio }))
-);
+import { getPortfolioSections } from "@/lib/notion.functions";
+import type { PortfolioSection } from "@/lib/notion.server";
 
 export const Route = createFileRoute("/portfolio")({
   component: PortfolioPage,
@@ -35,10 +31,10 @@ export const Route = createFileRoute("/portfolio")({
 });
 
 function PortfolioPage() {
-  const fetchPage = useServerFn(getPortfolioPage);
-  const { data: recordMap, isLoading } = useQuery({
-    queryKey: ["portfolio-page"],
-    queryFn: () => fetchPage(),
+  const fetchSections = useServerFn(getPortfolioSections);
+  const { data: sections = [], isLoading } = useQuery({
+    queryKey: ["portfolio-sections"],
+    queryFn: () => fetchSections(),
   });
 
   return (
@@ -74,16 +70,18 @@ function PortfolioPage() {
         </div>
       </section>
 
-      {/* Mobile : rendu Notion via react-notion-x (pas d'iframe) */}
-      <section className="pb-16 md:hidden">
+      {/* Mobile : 2 galeries Notion via API officielle */}
+      <section className="px-6 pb-16 md:hidden">
         {isLoading ? (
-          <p className="px-6 text-center text-muted-foreground">Chargement...</p>
-        ) : recordMap ? (
-          <Suspense fallback={<p className="px-6 text-center text-muted-foreground">Chargement...</p>}>
-            <NotionPortfolio recordMap={recordMap} />
-          </Suspense>
+          <p className="text-center text-muted-foreground">Chargement...</p>
+        ) : sections.length === 0 ? (
+          <p className="text-center text-muted-foreground">Impossible de charger le portfolio.</p>
         ) : (
-          <p className="px-6 text-center text-muted-foreground">Impossible de charger le portfolio.</p>
+          <div className="mx-auto max-w-5xl space-y-12">
+            {sections.map((section) => (
+              <PortfolioGallery key={section.title} section={section} />
+            ))}
+          </div>
         )}
       </section>
 
@@ -118,5 +116,52 @@ function PortfolioPage() {
 
       <NewsletterCTA />
     </SiteLayout>
+  );
+}
+
+function PortfolioGallery({ section }: { section: PortfolioSection }) {
+  return (
+    <div>
+      <h2 className="mb-6 font-display text-2xl font-bold">
+        {section.title}
+      </h2>
+      <div className="grid grid-cols-2 gap-4">
+        {section.items.map((p) => (
+          <Link
+            key={p.id}
+            to="/portfolio/$slug"
+            params={{ slug: p.slug }}
+            className="group block overflow-hidden rounded-2xl border border-border bg-card"
+          >
+            {p.cover ? (
+              <div className="aspect-square overflow-hidden bg-muted">
+                <img
+                  src={p.cover}
+                  alt={p.title}
+                  loading="lazy"
+                  className="size-full object-cover"
+                />
+              </div>
+            ) : (
+              <div className="aspect-square bg-accent flex items-center justify-center p-3">
+                <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest text-center leading-relaxed">
+                  {p.title}
+                </span>
+              </div>
+            )}
+            <div className="p-3">
+              <p className="font-display text-sm font-bold leading-tight group-hover:text-primary line-clamp-2">
+                {p.title}
+              </p>
+              {p.client && (
+                <p className="mt-1 font-mono text-xs text-muted-foreground uppercase tracking-widest">
+                  {p.client}
+                </p>
+              )}
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
   );
 }

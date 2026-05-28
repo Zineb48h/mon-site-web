@@ -251,39 +251,54 @@ async function getPageBlocks(pageId: string): Promise<ContentBlock[]> {
   }
 }
 
-/** Si l'ID fourni est une page (pas une base), cherche la première base enfant. */
-async function resolveToDatabase(idOrPageId: string): Promise<string | null> {
-  // Essai direct comme base de données
+/** Trouve toutes les child_databases dans une page. */
+async function getChildDatabaseIds(pageId: string): Promise<string[]> {
   try {
-    const data = await notionFetch(`/v1/databases/${idOrPageId}/query`, {
-      method: "POST",
-      body: JSON.stringify({ page_size: 1 }),
-    });
-    if (data?.object === "list") return idOrPageId; // c'est bien une base
-  } catch (_) {
-    // pas une base, on continue
-  }
-  // C'est une page → chercher la première child_database dans ses blocs
-  try {
-    const blocks = await notionFetch(`/v1/blocks/${idOrPageId}/children?page_size=50`);
-    for (const b of blocks?.results ?? []) {
-      if (b.type === "child_database") return b.id as string;
-    }
+    const blocks = await notionFetch(`/v1/blocks/${pageId}/children?page_size=100`);
+    return (blocks?.results ?? [])
+      .filter((b: any) => b.type === "child_database")
+      .map((b: any) => b.id as string);
   } catch (e) {
-    console.error("resolveToDatabase failed:", e instanceof Error ? e.message : String(e));
+    console.error("getChildDatabaseIds failed:", e instanceof Error ? e.message : String(e));
+    return [];
   }
-  return null;
+}
+
+/** Récupère le titre d'une base de données. */
+async function getDatabaseTitle(dbId: string): Promise<string> {
+  try {
+    const data = await notionFetch(`/v1/databases/${dbId}`);
+    return plainText(data?.title) || "Projets";
+  } catch (_) {
+    return "Projets";
+  }
+}
+
+export interface PortfolioSection {
+  title: string;
+  items: ContentItem[];
+}
+
+/** Retourne les 2 galeries du portfolio (optimisation profil + gestion réseaux). */
+export async function fetchPortfolioSections(): Promise<PortfolioSection[]> {
+  const pageId = process.env.NOTION_PORTFOLIO_DB_ID || "25752149dfd180348155cdbb9cfbd6ff";
+  const dbIds = await getChildDatabaseIds(pageId);
+  if (dbIds.length === 0) return [];
+
+  const sections: PortfolioSection[] = [];
+  for (const dbId of dbIds) {
+    const [title, items] = await Promise.all([
+      getDatabaseTitle(dbId),
+      queryDatabase(dbId),
+    ]);
+    if (items.length > 0) sections.push({ title, items });
+  }
+  return sections;
 }
 
 export async function fetchProjects(): Promise<ContentItem[]> {
-  const envId = process.env.NOTION_PORTFOLIO_DB_ID;
-  const rawId = envId || await findDatabaseId([
-    "projet", "portfolio", "case stud", "réalisation", "realisation", "client",
-  ]);
-  if (!rawId) return [];
-  const id = await resolveToDatabase(rawId);
-  if (!id) return [];
-  return queryDatabase(id);
+  const sections = await fetchPortfolioSections();
+  return sections.flatMap((s) => s.items);
 }
 
 export async function fetchArticles(): Promise<ContentItem[]> {

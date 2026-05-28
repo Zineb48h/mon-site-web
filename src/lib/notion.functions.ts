@@ -5,13 +5,11 @@ import {
   fetchArticles,
   fetchProjectBySlug,
   fetchArticleBySlug,
+  fetchPortfolioSections,
 } from "./notion.server";
-import { NotionAPI } from "notion-client";
 
-export const getPortfolioPage = createServerFn({ method: "GET" }).handler(async () => {
-  const notion = new NotionAPI();
-  const recordMap = await notion.getPage("25752149dfd180348155cdbb9cfbd6ff");
-  return recordMap;
+export const getPortfolioSections = createServerFn({ method: "GET" }).handler(async () => {
+  return fetchPortfolioSections();
 });
 
 export const getProjects = createServerFn({ method: "GET" }).handler(async () => {
