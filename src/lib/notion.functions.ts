@@ -8,6 +8,14 @@ import {
   fetchPortfolioSections,
 } from "./notion.server";
 
+export const getPortfolioRecordMap = createServerFn({ method: "GET" }).handler(async () => {
+  const { NotionAPI } = await import("notion-client");
+  const notion = new NotionAPI();
+  const pageId = process.env.NOTION_PORTFOLIO_DB_ID || "25752149dfd180348155cdbb9cfbd6ff";
+  const recordMap = await notion.getPage(pageId);
+  return recordMap;
+});
+
 export const getPortfolioSections = createServerFn({ method: "GET" }).handler(async () => {
   return fetchPortfolioSections();
 });

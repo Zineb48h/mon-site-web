@@ -4,8 +4,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { NewsletterCTA } from "@/components/site/NewsletterCTA";
 import { LogosMarquee } from "@/components/site/LogosMarquee";
-import { getPortfolioSections } from "@/lib/notion.functions";
-import { NotionPortfolio } from "@/components/site/NotionPortfolio";
+import { getPortfolioRecordMap } from "@/lib/notion.functions";
+import { NotionPortfolioFull } from "@/components/site/NotionPortfolioFull";
 
 export const Route = createFileRoute("/portfolio")({
   component: PortfolioPage,
@@ -31,10 +31,10 @@ export const Route = createFileRoute("/portfolio")({
 });
 
 function PortfolioPage() {
-  const fetchSections = useServerFn(getPortfolioSections);
-  const { data: galleries = [], isLoading } = useQuery({
-    queryKey: ["portfolio-sections"],
-    queryFn: () => fetchSections(),
+  const fetchRecordMap = useServerFn(getPortfolioRecordMap);
+  const { data: recordMap, isLoading } = useQuery({
+    queryKey: ["portfolio-record-map"],
+    queryFn: () => fetchRecordMap(),
   });
 
   return (
@@ -70,14 +70,14 @@ function PortfolioPage() {
         </div>
       </section>
 
-      {/* Mobile : galeries Notion via API non-officielle (react-notion-x) */}
+      {/* Mobile : rendu Notion via react-notion-x (même contenu que l'iframe desktop) */}
       <section className="pb-16 md:hidden">
         {isLoading ? (
           <p className="px-6 text-center text-muted-foreground">Chargement...</p>
-        ) : galleries.length === 0 ? (
+        ) : !recordMap ? (
           <p className="px-6 text-center text-muted-foreground">Impossible de charger le portfolio.</p>
         ) : (
-          <NotionPortfolio galleries={galleries} />
+          <NotionPortfolioFull recordMap={recordMap} />
         )}
       </section>
 
@@ -112,52 +112,5 @@ function PortfolioPage() {
 
       <NewsletterCTA />
     </SiteLayout>
-  );
-}
-
-function PortfolioGallery({ section }: { section: PortfolioSection }) {
-  return (
-    <div>
-      <h2 className="mb-6 font-display text-2xl font-bold">
-        {section.title}
-      </h2>
-      <div className="grid grid-cols-2 gap-4">
-        {section.items.map((p) => (
-          <Link
-            key={p.id}
-            to="/portfolio/$slug"
-            params={{ slug: p.slug }}
-            className="group block overflow-hidden rounded-2xl border border-border bg-card"
-          >
-            {p.cover ? (
-              <div className="aspect-square overflow-hidden bg-muted">
-                <img
-                  src={p.cover}
-                  alt={p.title}
-                  loading="lazy"
-                  className="size-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="aspect-square bg-accent flex items-center justify-center p-3">
-                <span className="font-mono text-xs text-muted-foreground uppercase tracking-widest text-center leading-relaxed">
-                  {p.title}
-                </span>
-              </div>
-            )}
-            <div className="p-3">
-              <p className="font-display text-sm font-bold leading-tight group-hover:text-primary line-clamp-2">
-                {p.title}
-              </p>
-              {p.client && (
-                <p className="mt-1 font-mono text-xs text-muted-foreground uppercase tracking-widest">
-                  {p.client}
-                </p>
-              )}
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
   );
 }

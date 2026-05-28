@@ -11,4 +11,9 @@ export default defineConfig({
   tanstackStart: {
     server: { preset: "vercel" },
   },
+  vite: {
+    optimizeDeps: {
+      include: ["react-virtualized"],
+    },
+  },
 });
