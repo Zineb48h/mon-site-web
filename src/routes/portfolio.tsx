@@ -47,21 +47,40 @@ function PortfolioPage() {
 
       <LogosMarquee />
 
-      <section className="px-6 pb-16">
+      {/* Desktop : iframe Notion intégrée */}
+      <section className="hidden px-6 pb-16 md:block">
         <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-border bg-card shadow-sm">
-          <div
-            className="h-[80vh] overflow-y-auto overscroll-contain md:h-auto md:overflow-visible"
-            style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+          <iframe
+            src="https://zineb-socialmediamanager.notion.site/ebd/25752149dfd180348155cdbb9cfbd6ff"
+            title="Portfolio Notion"
+            width="100%"
+            className="block h-[1200px] w-full border-0"
+            loading="lazy"
+            allowFullScreen
+          />
+        </div>
+      </section>
+
+      {/* Mobile : bouton vers Notion (iframe trop lourde pour mobile) */}
+      <section className="px-6 pb-16 md:hidden">
+        <div className="mx-auto max-w-xl rounded-3xl border-2 border-dashed border-border bg-card p-10 text-center">
+          <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            (Portfolio complet)
+          </p>
+          <h2 className="mt-4 font-display text-2xl font-bold">
+            Voir toutes mes <span className="font-serif italic text-primary">réalisations</span>
+          </h2>
+          <p className="mt-3 text-muted-foreground">
+            Retrouve l'intégralité de mon portfolio sur Notion : études de cas, visuels et résultats.
+          </p>
+          <a
+            href="https://zineb-socialmediamanager.notion.site/ebd/25752149dfd180348155cdbb9cfbd6ff"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-6 inline-flex items-center justify-center rounded-2xl bg-primary px-8 py-4 font-display text-lg font-bold text-primary-foreground transition-transform hover:-rotate-2"
           >
-            <iframe
-              src="https://zineb-socialmediamanager.notion.site/ebd/25752149dfd180348155cdbb9cfbd6ff"
-              title="Portfolio Notion"
-              width="100%"
-              className="block h-[1200px] w-full border-0"
-              loading="lazy"
-              allowFullScreen
-            />
-          </div>
+            Voir le portfolio →
+          </a>
         </div>
       </section>
 
