@@ -152,6 +152,7 @@ function mapPageToItem(page: any): ContentItem {
 }
 
 async function queryDatabase(databaseId: string): Promise<ContentItem[]> {
+  console.log("[Notion] queryDatabase called with id:", databaseId);
   try {
     const data = await notionFetch(`/v1/databases/${databaseId}/query`, {
       method: "POST",
@@ -173,7 +174,7 @@ async function queryDatabase(databaseId: string): Promise<ContentItem[]> {
       .filter((i: ContentItem) => i.title);
     return filtered.length ? filtered : items;
   } catch (e) {
-    console.error("Notion queryDatabase failed", e);
+    console.error("Notion queryDatabase failed:", e instanceof Error ? e.message : String(e));
     return [];
   }
 }
