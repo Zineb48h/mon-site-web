@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { NewsletterCTA } from "@/components/site/NewsletterCTA";
 import { LogosMarquee } from "@/components/site/LogosMarquee";
-import { PortfolioCarousel } from "@/components/site/PortfolioCarousel";
 
 export const Route = createFileRoute("/portfolio")({
   component: PortfolioPage,
@@ -47,21 +46,18 @@ function PortfolioPage() {
 
       <LogosMarquee />
 
-      <section className="px-6 pb-8">
-        <div className="mx-auto max-w-5xl">
-          <PortfolioCarousel />
+      <section className="px-6 pb-16">
+        <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-border bg-card shadow-sm">
+          <iframe
+            src="https://zineb-socialmediamanager.notion.site/ebd/25752149dfd180348155cdbb9cfbd6ff"
+            title="Portfolio Notion"
+            width="100%"
+            height="600"
+            className="block h-[1200px] w-full"
+            loading="lazy"
+            allowFullScreen
+          />
         </div>
-      </section>
-
-      <section className="px-6 pb-16 text-center">
-        <a
-          href="https://zineb-socialmediamanager.notion.site/ebd/25752149dfd180348155cdbb9cfbd6ff"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 rounded-2xl border-2 border-border bg-card px-6 py-3 font-mono text-sm uppercase tracking-widest transition-transform hover:-rotate-1 hover:border-primary hover:text-primary"
-        >
-          Voir le portfolio complet →
-        </a>
       </section>
 
       <section className="px-6 py-24 text-center">
