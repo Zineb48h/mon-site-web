@@ -1,8 +1,10 @@
-import React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { NewsletterCTA } from "@/components/site/NewsletterCTA";
 import { LogosMarquee } from "@/components/site/LogosMarquee";
+import { getProjects } from "@/lib/notion.functions";
 
 export const Route = createFileRoute("/portfolio")({
   component: PortfolioPage,
@@ -28,6 +30,12 @@ export const Route = createFileRoute("/portfolio")({
 });
 
 function PortfolioPage() {
+  const fetchProjects = useServerFn(getProjects);
+  const { data: projects = [], isLoading } = useQuery({
+    queryKey: ["projects"],
+    queryFn: () => fetchProjects(),
+  });
+
   return (
     <SiteLayout>
       <section className="px-6 py-12">
@@ -61,26 +69,53 @@ function PortfolioPage() {
         </div>
       </section>
 
-      {/* Mobile : bouton vers Notion (iframe trop lourde pour mobile) */}
+      {/* Mobile : galerie React depuis Notion (pas d'iframe) */}
       <section className="px-6 pb-16 md:hidden">
-        <div className="mx-auto max-w-xl rounded-3xl border-2 border-dashed border-border bg-card p-10 text-center">
-          <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
-            (Portfolio complet)
-          </p>
-          <h2 className="mt-4 font-display text-2xl font-bold">
-            Voir toutes mes <span className="font-serif italic text-primary">réalisations</span>
-          </h2>
-          <p className="mt-3 text-muted-foreground">
-            Retrouve l'intégralité de mon portfolio sur Notion : études de cas, visuels et résultats.
-          </p>
-          <a
-            href="https://zineb-socialmediamanager.notion.site/ebd/25752149dfd180348155cdbb9cfbd6ff"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-6 inline-flex items-center justify-center rounded-2xl bg-primary px-8 py-4 font-display text-lg font-bold text-primary-foreground transition-transform hover:-rotate-2"
-          >
-            Voir le portfolio →
-          </a>
+        <div className="mx-auto max-w-5xl">
+          {isLoading ? (
+            <p className="text-center text-muted-foreground">Chargement...</p>
+          ) : projects.length === 0 ? (
+            <p className="text-center text-muted-foreground">Aucun projet trouvé.</p>
+          ) : (
+            <div className="grid gap-6">
+              {projects.map((p) => (
+                <Link
+                  key={p.id}
+                  to="/portfolio/$slug"
+                  params={{ slug: p.slug }}
+                  className="group block space-y-3 rounded-3xl border border-border bg-card p-5 transition-transform hover:-rotate-1"
+                >
+                  {p.cover && (
+                    <div className="aspect-video overflow-hidden rounded-2xl bg-muted">
+                      <img
+                        src={p.cover}
+                        alt={p.title}
+                        loading="lazy"
+                        className="size-full object-cover"
+                      />
+                    </div>
+                  )}
+                  <div className="flex flex-wrap items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                    {p.category && (
+                      <span className="text-primary">{p.category}</span>
+                    )}
+                    {p.client && <span>{p.client}</span>}
+                  </div>
+                  <h2 className="font-display text-xl font-bold group-hover:text-primary">
+                    {p.title}
+                  </h2>
+                  {p.excerpt && (
+                    <p className="text-sm text-muted-foreground">{p.excerpt}</p>
+                  )}
+                  {p.metric && (
+                    <span className="inline-block rounded-xl bg-accent px-3 py-1 font-display text-sm font-bold">
+                      {p.metric}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
