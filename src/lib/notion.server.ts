@@ -314,7 +314,10 @@ export async function fetchArticles(): Promise<ContentItem[]> {
 
 export async function fetchProjectBySlug(slug: string) {
   const items = await fetchProjects();
-  const item = items.find((i) => i.slug === slug);
+  // Cherche par slug ou par ID (sans tirets) pour compatibilité react-notion-x
+  const item = items.find(
+    (i) => i.slug === slug || i.id.replace(/-/g, "") === slug
+  );
   if (!item) return null;
   const blocks = await getPageBlocks(item.id);
   return { item, blocks };

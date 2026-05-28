@@ -29,17 +29,6 @@ export const getGalleryRecordMaps = createServerFn({ method: "GET" }).handler(as
     .filter((b: any) => b.type === "child_database")
     .map((b: any) => (b.id as string).replace(/-/g, ""));
 
-  // Récupère aussi les slugs via API officielle (pour les liens /portfolio/$slug)
-  const sections = await fetchPortfolioSections();
-  // Map : pageId (sans tirets) → slug
-  const idToSlug: Record<string, string> = {};
-  for (const section of sections) {
-    for (const item of section.items) {
-      const cleanId = item.id.replace(/-/g, "");
-      idToSlug[cleanId] = item.slug;
-    }
-  }
-
   // Fetch chaque galerie via API non-officielle (gère les images correctement)
   const galleries = await Promise.all(
     dbIds.map(async (id) => {
@@ -49,6 +38,24 @@ export const getGalleryRecordMaps = createServerFn({ method: "GET" }).handler(as
       return { id, title, recordMap };
     })
   );
+
+  // Construit idToSlug directement depuis les recordMaps (fiable, même source)
+  const toSlug = (s: string) =>
+    s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 80);
+
+  const idToSlug: Record<string, string> = {};
+  for (const g of galleries) {
+    for (const [blockId, blockData] of Object.entries(g.recordMap.block || {})) {
+      const b = (blockData as any)?.value;
+      if (b?.type === "page") {
+        const titleArr = b?.properties?.title || [];
+        const pageTitle = titleArr.map((t: any) => (Array.isArray(t) ? t[0] : t)).join("");
+        const slug = toSlug(pageTitle);
+        if (slug) idToSlug[blockId.replace(/-/g, "")] = slug;
+      }
+    }
+  }
 
   return { galleries, idToSlug };
 });
