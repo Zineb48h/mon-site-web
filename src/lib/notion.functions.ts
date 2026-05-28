@@ -16,34 +16,42 @@ export const getGalleryRecordMaps = createServerFn({ method: "GET" }).handler(as
   const { NotionAPI } = await import("notion-client");
   const notion = new NotionAPI();
 
+  const key = process.env.NOTION_API_KEY!;
   const pageId = process.env.NOTION_PORTFOLIO_DB_ID || "25752149dfd180348155cdbb9cfbd6ff";
 
-  // Fetch la page portfolio complète — elle contient les 2 galeries
-  const recordMap = await notion.getPage(pageId);
+  // Étape 1 : récupère les IDs des galeries via API officielle
+  const blocksRes = await fetch(
+    `https://api.notion.com/v1/blocks/${pageId}/children?page_size=100`,
+    { headers: { Authorization: `Bearer ${key}`, "Notion-Version": "2022-06-28" } }
+  );
+  const blocks = await blocksRes.json();
+  const dbIds: string[] = (blocks?.results ?? [])
+    .filter((b: any) => b.type === "child_database")
+    .map((b: any) => (b.id as string).replace(/-/g, ""));
 
-  const collectionKeys = Object.keys(recordMap.collection || {});
-  console.log("[Portfolio] collections trouvées:", collectionKeys.length);
+  console.log("[Portfolio] dbIds trouvés:", dbIds.length, dbIds);
 
-  const galleries: Array<{
-    id: string;
-    title: string;
-    items: Array<{ id: string; title: string; cover: string }>;
-  }> = [];
-
-  for (const collectionId of collectionKeys) {
-    const collection = (recordMap.collection[collectionId] as any)?.value;
-    const collTitle = collection?.name?.[0]?.[0] || "Projets";
+  // Étape 2 : fetch chaque galerie par son ID via API non-officielle
+  function extractItemsFromRecordMap(recordMap: any, dbId: string) {
+    const collectionId = Object.keys(recordMap.collection || {})[0];
+    if (!collectionId) { console.log("[Portfolio] pas de collection pour", dbId); return []; }
 
     const queryData = (recordMap.collection_query as any)?.[collectionId];
-    if (!queryData) continue;
+    if (!queryData) { console.log("[Portfolio] pas de collection_query pour", dbId); return []; }
 
     const viewId = Object.keys(queryData)[0];
     const viewData = queryData[viewId] as any;
+
+    // Essaie tous les chemins possibles pour les blockIds
     const blockIds: string[] =
       viewData?.collection_group_results?.blockIds ||
-      viewData?.blockIds || [];
+      viewData?.blockIds ||
+      viewData?.result?.blockIds ||
+      [];
 
-    const items = blockIds
+    console.log("[Portfolio] blockIds pour", dbId, ":", blockIds.length);
+
+    return blockIds
       .map((blockId: string) => {
         const block = (recordMap.block as any)?.[blockId]?.value;
         if (!block) return null;
@@ -55,11 +63,23 @@ export const getGalleryRecordMaps = createServerFn({ method: "GET" }).handler(as
       })
       .filter(Boolean)
       .filter((i: any) => i.title) as Array<{ id: string; title: string; cover: string }>;
-
-    if (items.length > 0) galleries.push({ id: collectionId, title: collTitle, items });
   }
 
-  return galleries;
+  const galleries = await Promise.all(
+    dbIds.map(async (id) => {
+      const recordMap = await notion.getPage(id);
+      const block = (recordMap?.block as any)?.[id]?.value;
+      const collVal = Object.values(recordMap.collection || {})[0] as any;
+      const title =
+        collVal?.value?.name?.[0]?.[0] ||
+        block?.properties?.title?.[0]?.[0] ||
+        "Projets";
+      const items = extractItemsFromRecordMap(recordMap, id);
+      return { id, title, items };
+    })
+  );
+
+  return galleries.filter((g) => g.items.length > 0);
 });
 
 export const getProjects = createServerFn({ method: "GET" }).handler(async () => {

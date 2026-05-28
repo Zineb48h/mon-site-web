@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { NewsletterCTA } from "@/components/site/NewsletterCTA";
 import { LogosMarquee } from "@/components/site/LogosMarquee";
-import { getGalleryRecordMaps } from "@/lib/notion.functions";
+import { getPortfolioSections } from "@/lib/notion.functions";
 import { NotionPortfolio } from "@/components/site/NotionPortfolio";
 
 export const Route = createFileRoute("/portfolio")({
@@ -31,10 +31,10 @@ export const Route = createFileRoute("/portfolio")({
 });
 
 function PortfolioPage() {
-  const fetchGalleries = useServerFn(getGalleryRecordMaps);
+  const fetchSections = useServerFn(getPortfolioSections);
   const { data: galleries = [], isLoading } = useQuery({
-    queryKey: ["portfolio-galleries"],
-    queryFn: () => fetchGalleries(),
+    queryKey: ["portfolio-sections"],
+    queryFn: () => fetchSections(),
   });
 
   return (
