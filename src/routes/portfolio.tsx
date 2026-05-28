@@ -1,10 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { lazy, Suspense } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { NewsletterCTA } from "@/components/site/NewsletterCTA";
 import { LogosMarquee } from "@/components/site/LogosMarquee";
-import { getProjects } from "@/lib/notion.functions";
+import { getPortfolioPage } from "@/lib/notion.functions";
+
+const NotionPortfolio = lazy(() =>
+  import("@/components/site/NotionPortfolio").then((m) => ({ default: m.NotionPortfolio }))
+);
 
 export const Route = createFileRoute("/portfolio")({
   component: PortfolioPage,
@@ -30,10 +35,10 @@ export const Route = createFileRoute("/portfolio")({
 });
 
 function PortfolioPage() {
-  const fetchProjects = useServerFn(getProjects);
-  const { data: projects = [], isLoading } = useQuery({
-    queryKey: ["projects"],
-    queryFn: () => fetchProjects(),
+  const fetchPage = useServerFn(getPortfolioPage);
+  const { data: recordMap, isLoading } = useQuery({
+    queryKey: ["portfolio-page"],
+    queryFn: () => fetchPage(),
   });
 
   return (
@@ -69,54 +74,17 @@ function PortfolioPage() {
         </div>
       </section>
 
-      {/* Mobile : galerie React depuis Notion (pas d'iframe) */}
-      <section className="px-6 pb-16 md:hidden">
-        <div className="mx-auto max-w-5xl">
-          {isLoading ? (
-            <p className="text-center text-muted-foreground">Chargement...</p>
-          ) : projects.length === 0 ? (
-            <p className="text-center text-muted-foreground">Aucun projet trouvé.</p>
-          ) : (
-            <div className="grid gap-6">
-              {projects.map((p) => (
-                <Link
-                  key={p.id}
-                  to="/portfolio/$slug"
-                  params={{ slug: p.slug }}
-                  className="group block space-y-3 rounded-3xl border border-border bg-card p-5 transition-transform hover:-rotate-1"
-                >
-                  {p.cover && (
-                    <div className="aspect-video overflow-hidden rounded-2xl bg-muted">
-                      <img
-                        src={p.cover}
-                        alt={p.title}
-                        loading="lazy"
-                        className="size-full object-cover"
-                      />
-                    </div>
-                  )}
-                  <div className="flex flex-wrap items-center gap-2 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-                    {p.category && (
-                      <span className="text-primary">{p.category}</span>
-                    )}
-                    {p.client && <span>{p.client}</span>}
-                  </div>
-                  <h2 className="font-display text-xl font-bold group-hover:text-primary">
-                    {p.title}
-                  </h2>
-                  {p.excerpt && (
-                    <p className="text-sm text-muted-foreground">{p.excerpt}</p>
-                  )}
-                  {p.metric && (
-                    <span className="inline-block rounded-xl bg-accent px-3 py-1 font-display text-sm font-bold">
-                      {p.metric}
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
+      {/* Mobile : rendu Notion via react-notion-x (pas d'iframe) */}
+      <section className="pb-16 md:hidden">
+        {isLoading ? (
+          <p className="px-6 text-center text-muted-foreground">Chargement...</p>
+        ) : recordMap ? (
+          <Suspense fallback={<p className="px-6 text-center text-muted-foreground">Chargement...</p>}>
+            <NotionPortfolio recordMap={recordMap} />
+          </Suspense>
+        ) : (
+          <p className="px-6 text-center text-muted-foreground">Impossible de charger le portfolio.</p>
+        )}
       </section>
 
       <section className="px-6 py-24 text-center">

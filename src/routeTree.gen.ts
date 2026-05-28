@@ -22,6 +22,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as PortfolioSlugRouteImport } from './routes/portfolio.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiSubscribeRouteImport } from './routes/api/subscribe'
+import { Route as ApiNotionTestRouteImport } from './routes/api/notion-test'
 import { Route as ApiContactRouteImport } from './routes/api/contact'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -89,6 +90,11 @@ const ApiSubscribeRoute = ApiSubscribeRouteImport.update({
   path: '/api/subscribe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiNotionTestRoute = ApiNotionTestRouteImport.update({
+  id: '/api/notion-test',
+  path: '/api/notion-test',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiContactRoute = ApiContactRouteImport.update({
   id: '/api/contact',
   path: '/api/contact',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/contact': typeof ApiContactRoute
+  '/api/notion-test': typeof ApiNotionTestRoute
   '/api/subscribe': typeof ApiSubscribeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/contact': typeof ApiContactRoute
+  '/api/notion-test': typeof ApiNotionTestRoute
   '/api/subscribe': typeof ApiSubscribeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/contact': typeof ApiContactRoute
+  '/api/notion-test': typeof ApiNotionTestRoute
   '/api/subscribe': typeof ApiSubscribeRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/portfolio/$slug': typeof PortfolioSlugRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/api/contact'
+    | '/api/notion-test'
     | '/api/subscribe'
     | '/blog/$slug'
     | '/portfolio/$slug'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/api/contact'
+    | '/api/notion-test'
     | '/api/subscribe'
     | '/blog/$slug'
     | '/portfolio/$slug'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sitemap.xml'
     | '/api/contact'
+    | '/api/notion-test'
     | '/api/subscribe'
     | '/blog/$slug'
     | '/portfolio/$slug'
@@ -207,6 +219,7 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiContactRoute: typeof ApiContactRoute
+  ApiNotionTestRoute: typeof ApiNotionTestRoute
   ApiSubscribeRoute: typeof ApiSubscribeRoute
 }
 
@@ -303,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSubscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/notion-test': {
+      id: '/api/notion-test'
+      path: '/api/notion-test'
+      fullPath: '/api/notion-test'
+      preLoaderRoute: typeof ApiNotionTestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/contact': {
       id: '/api/contact'
       path: '/api/contact'
@@ -347,6 +367,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiContactRoute: ApiContactRoute,
+  ApiNotionTestRoute: ApiNotionTestRoute,
   ApiSubscribeRoute: ApiSubscribeRoute,
 }
 export const routeTree = rootRouteImport
