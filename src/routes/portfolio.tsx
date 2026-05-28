@@ -50,7 +50,7 @@ function PortfolioPage() {
       <section className="px-6 pb-16">
         <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-border bg-card shadow-sm">
           <div
-            className="h-[80vh] overflow-y-auto overscroll-contain"
+            className="h-[80vh] overflow-y-auto overscroll-contain md:h-auto md:overflow-visible"
             style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
           >
             <iframe
