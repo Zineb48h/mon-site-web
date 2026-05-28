@@ -16,75 +16,50 @@ export const getGalleryRecordMaps = createServerFn({ method: "GET" }).handler(as
   const { NotionAPI } = await import("notion-client");
   const notion = new NotionAPI();
 
-  const key = process.env.NOTION_API_KEY!;
   const pageId = process.env.NOTION_PORTFOLIO_DB_ID || "25752149dfd180348155cdbb9cfbd6ff";
 
-  // Récupère les IDs des bases via API officielle
-  const blocksRes = await fetch(
-    `https://api.notion.com/v1/blocks/${pageId}/children?page_size=100`,
-    { headers: { Authorization: `Bearer ${key}`, "Notion-Version": "2022-06-28" } }
-  );
-  const blocks = await blocksRes.json();
-  const dbIds: string[] = (blocks?.results ?? [])
-    .filter((b: any) => b.type === "child_database")
-    .map((b: any) => (b.id as string).replace(/-/g, ""));
+  // Fetch la page portfolio complète — elle contient les 2 galeries
+  const recordMap = await notion.getPage(pageId);
 
-  // Fetch chaque galerie via API non-officielle (gère les images correctement)
-  const galleries = await Promise.all(
-    dbIds.map(async (id) => {
-      const recordMap = await notion.getPage(id);
-      const block = recordMap?.block?.[id]?.value as any;
-      const title = block?.properties?.title?.[0]?.[0] || "Projets";
-      return { id, title, recordMap };
-    })
-  );
+  const collectionKeys = Object.keys(recordMap.collection || {});
+  console.log("[Portfolio] collections trouvées:", collectionKeys.length);
 
-  // Construit idToSlug directement depuis les recordMaps (fiable, même source)
-  const toSlug = (s: string) =>
-    s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
-      .replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 80);
+  const galleries: Array<{
+    id: string;
+    title: string;
+    items: Array<{ id: string; title: string; cover: string }>;
+  }> = [];
 
-  const idToSlug: Record<string, string> = {};
-  for (const g of galleries) {
-    for (const [blockId, blockData] of Object.entries(g.recordMap.block || {})) {
-      const b = (blockData as any)?.value;
-      if (b?.type === "page") {
-        const titleArr = b?.properties?.title || [];
-        const pageTitle = titleArr.map((t: any) => (Array.isArray(t) ? t[0] : t)).join("");
-        const slug = toSlug(pageTitle);
-        if (slug) idToSlug[blockId.replace(/-/g, "")] = slug;
-      }
-    }
-  }
+  for (const collectionId of collectionKeys) {
+    const collection = (recordMap.collection[collectionId] as any)?.value;
+    const collTitle = collection?.name?.[0]?.[0] || "Projets";
 
-  // Extrait les items de chaque galerie depuis le recordMap
-  function extractItems(recordMap: any) {
-    const collectionId = Object.keys(recordMap.collection || {})[0];
-    if (!collectionId) return [];
-    const queryData = recordMap.collection_query?.[collectionId];
-    if (!queryData) return [];
+    const queryData = (recordMap.collection_query as any)?.[collectionId];
+    if (!queryData) continue;
+
     const viewId = Object.keys(queryData)[0];
+    const viewData = queryData[viewId] as any;
     const blockIds: string[] =
-      queryData[viewId]?.collection_group_results?.blockIds ||
-      queryData[viewId]?.blockIds || [];
-    return blockIds.map((blockId: string) => {
-      const block = recordMap.block?.[blockId]?.value;
-      if (!block) return null;
-      const titleArr = block?.properties?.title || [];
-      const title = titleArr.map((t: any) => (Array.isArray(t) ? t[0] : t)).join("");
-      let cover = block?.format?.page_cover || "";
-      if (cover && cover.startsWith("/")) cover = `https://www.notion.so${cover}`;
-      return { id: blockId.replace(/-/g, ""), title, cover };
-    }).filter(Boolean).filter((i: any) => i.title);
+      viewData?.collection_group_results?.blockIds ||
+      viewData?.blockIds || [];
+
+    const items = blockIds
+      .map((blockId: string) => {
+        const block = (recordMap.block as any)?.[blockId]?.value;
+        if (!block) return null;
+        const titleArr = block?.properties?.title || [];
+        const title = titleArr.map((t: any) => (Array.isArray(t) ? t[0] : t)).join("");
+        let cover = block?.format?.page_cover || "";
+        if (cover && cover.startsWith("/")) cover = `https://www.notion.so${cover}`;
+        return { id: blockId.replace(/-/g, ""), title, cover };
+      })
+      .filter(Boolean)
+      .filter((i: any) => i.title) as Array<{ id: string; title: string; cover: string }>;
+
+    if (items.length > 0) galleries.push({ id: collectionId, title: collTitle, items });
   }
 
-  const galleriesWithItems = galleries.map((g) => ({
-    id: g.id,
-    title: g.title,
-    items: extractItems(g.recordMap),
-  }));
-
-  return galleriesWithItems;
+  return galleries;
 });
 
 export const getProjects = createServerFn({ method: "GET" }).handler(async () => {
