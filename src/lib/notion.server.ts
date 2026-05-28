@@ -251,7 +251,9 @@ async function getPageBlocks(pageId: string): Promise<ContentBlock[]> {
 }
 
 export async function fetchProjects(): Promise<ContentItem[]> {
-  const id = await findDatabaseId([
+  // Priorité : variable d'env NOTION_PORTFOLIO_DB_ID (plus fiable que la recherche par nom)
+  const envId = process.env.NOTION_PORTFOLIO_DB_ID;
+  const id = envId || await findDatabaseId([
     "projet",
     "portfolio",
     "case stud",
