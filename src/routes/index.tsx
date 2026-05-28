@@ -302,13 +302,13 @@ function Index() {
       {/* Services */}
       <section className="bg-card px-6 py-24">
         <div className="mx-auto max-w-6xl">
-          <div className="mb-16 flex flex-col-reverse items-start justify-between gap-4 md:flex-row md:items-end">
-            <h2 className="font-display text-4xl font-bold md:text-5xl">
-              Mes <span className="font-serif italic text-primary">super-pouvoirs</span>
-            </h2>
+          <div className="mb-16 flex flex-col gap-3">
             <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
               (01) services & expertise
             </p>
+            <h2 className="font-display text-4xl font-bold md:text-5xl">
+              Mes <span className="font-serif italic text-primary">super-pouvoirs</span>
+            </h2>
           </div>
           <div className="grid gap-8 md:grid-cols-3">
             {SERVICES.map((s, i) => (
@@ -316,7 +316,7 @@ function Index() {
                 key={s.title}
                 ref={cardReveals[i].ref}
                 className={`
-                  transition-all duration-500 ease-out
+                  h-full transition-all duration-500 ease-out
                   md:opacity-100 md:translate-y-0 md:scale-100
                   ${cardReveals[i].visible
                     ? "opacity-100 translate-y-0 scale-100"
@@ -326,7 +326,7 @@ function Index() {
                 <Link
                   to="/services"
                   hash={s.hash}
-                  className={`${s.rotate} ${s.border} ${s.shadow} ${s.bg} group block rounded-[2.5rem] p-8 transition-all duration-300 hover:rotate-0 hover:-translate-y-2`}
+                  className={`${s.rotate} ${s.border} ${s.shadow} ${s.bg} group block h-full rounded-[2.5rem] p-8 transition-all duration-300 hover:rotate-0 hover:-translate-y-2`}
                 >
                   <div className={`mb-6 grid size-14 place-items-center rounded-2xl ${s.iconBg} text-2xl`}>
                     {s.emoji}

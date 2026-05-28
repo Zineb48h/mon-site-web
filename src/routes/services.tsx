@@ -268,11 +268,11 @@ function ServicesPage() {
             <div
               key={o.title}
               ref={offerReveals[i].ref}
-              className={`transition-all duration-500 ease-out md:opacity-100 md:translate-y-0 md:scale-100 ${offerReveals[i].visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-95"}`}
+              className={`h-full transition-all duration-500 ease-out md:opacity-100 md:translate-y-0 md:scale-100 ${offerReveals[i].visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-95"}`}
             >
               <article
                 id={o.title.toLowerCase().replace(/\s+/g, "-").replace(/[éèê]/g, "e").replace(/[àâ]/g, "a")}
-                className={`${o.bg} ${o.rotate} ${o.border} ${o.shadow} relative flex flex-col rounded-[2.5rem] p-8 transition-all duration-300 hover:rotate-0 hover:-translate-y-2`}
+                className={`${o.bg} ${o.rotate} ${o.border} ${o.shadow} relative flex h-full flex-col rounded-[2.5rem] p-8 transition-all duration-300 hover:rotate-0 hover:-translate-y-2`}
               >
                 {o.highlight && (
                   <span className="absolute -top-3 right-6 rounded-full bg-foreground px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-card">
@@ -347,11 +347,11 @@ function ServicesPage() {
               <div
                 key={a.title}
                 ref={addonReveals[i].ref}
-                className={`transition-all duration-500 ease-out md:opacity-100 md:translate-y-0 md:scale-100 ${addonReveals[i].visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-95"}`}
+                className={`h-full transition-all duration-500 ease-out md:opacity-100 md:translate-y-0 md:scale-100 ${addonReveals[i].visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-95"}`}
               >
                 <div
                   id={a.title.toLowerCase().replace(/\s+/g, "-").replace(/[éèê]/g, "e").replace(/[àâ]/g, "a")}
-                  className={`${a.bg} ${a.rotate} ${a.border} ${a.shadow} relative flex flex-col rounded-[2.5rem] p-8 transition-all duration-300 hover:rotate-0 hover:-translate-y-2`}
+                  className={`${a.bg} ${a.rotate} ${a.border} ${a.shadow} relative flex h-full flex-col rounded-[2.5rem] p-8 transition-all duration-300 hover:rotate-0 hover:-translate-y-2`}
                 >
                   <span className="absolute -top-3 left-6 rounded-full bg-foreground px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-card">
                     {a.badge}

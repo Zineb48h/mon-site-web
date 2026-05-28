@@ -58,8 +58,8 @@ function BlogPage() {
             (Blog)
           </p>
           <h1 className="font-display text-5xl font-bold leading-[0.95] tracking-tighter md:text-7xl">
-            Le carnet{" "}
-            <span className="font-serif italic text-primary">social</span>.
+            Le{" "}
+            <span className="font-serif italic text-primary">Post-it</span>.
           </h1>
           <p className="mt-8 max-w-2xl text-xl leading-relaxed text-muted-foreground">
             Tactiques, opinions et retours d'expérience sur l'univers social
