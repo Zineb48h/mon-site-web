@@ -1,27 +1,24 @@
 /**
  * Notion API helpers (server-only).
- * Goes through the Lovable connector gateway — never calls api.notion.com directly.
+ * Appelle directement api.notion.com — aucune dépendance Lovable.
  */
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/notion";
+const NOTION_BASE = "https://api.notion.com";
 
 function getEnv() {
-  const lovableKey = process.env.LOVABLE_API_KEY;
   const notionKey = process.env.NOTION_API_KEY;
-  if (!lovableKey)
-    throw new Error("LOVABLE_API_KEY manquante — re-linker la connexion Notion.");
   if (!notionKey)
-    throw new Error("NOTION_API_KEY manquante — re-linker la connexion Notion.");
-  return { lovableKey, notionKey };
+    throw new Error("NOTION_API_KEY manquante — ajouter la clé dans Vercel.");
+  return { notionKey };
 }
 
 async function notionFetch(path: string, init: RequestInit = {}) {
-  const { lovableKey, notionKey } = getEnv();
-  const res = await fetch(`${GATEWAY_URL}${path}`, {
+  const { notionKey } = getEnv();
+  const res = await fetch(`${NOTION_BASE}${path}`, {
     ...init,
     headers: {
-      Authorization: `Bearer ${lovableKey}`,
-      "X-Connection-Api-Key": notionKey,
+      Authorization: `Bearer ${notionKey}`,
+      "Notion-Version": "2022-06-28",
       "Content-Type": "application/json",
       ...(init.headers || {}),
     },
