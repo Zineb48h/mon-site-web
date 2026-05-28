@@ -251,17 +251,37 @@ async function getPageBlocks(pageId: string): Promise<ContentBlock[]> {
   }
 }
 
+/** Si l'ID fourni est une page (pas une base), cherche la première base enfant. */
+async function resolveToDatabase(idOrPageId: string): Promise<string | null> {
+  // Essai direct comme base de données
+  try {
+    const data = await notionFetch(`/v1/databases/${idOrPageId}/query`, {
+      method: "POST",
+      body: JSON.stringify({ page_size: 1 }),
+    });
+    if (data?.object === "list") return idOrPageId; // c'est bien une base
+  } catch (_) {
+    // pas une base, on continue
+  }
+  // C'est une page → chercher la première child_database dans ses blocs
+  try {
+    const blocks = await notionFetch(`/v1/blocks/${idOrPageId}/children?page_size=50`);
+    for (const b of blocks?.results ?? []) {
+      if (b.type === "child_database") return b.id as string;
+    }
+  } catch (e) {
+    console.error("resolveToDatabase failed:", e instanceof Error ? e.message : String(e));
+  }
+  return null;
+}
+
 export async function fetchProjects(): Promise<ContentItem[]> {
-  // Priorité : variable d'env NOTION_PORTFOLIO_DB_ID (plus fiable que la recherche par nom)
   const envId = process.env.NOTION_PORTFOLIO_DB_ID;
-  const id = envId || await findDatabaseId([
-    "projet",
-    "portfolio",
-    "case stud",
-    "réalisation",
-    "realisation",
-    "client",
+  const rawId = envId || await findDatabaseId([
+    "projet", "portfolio", "case stud", "réalisation", "realisation", "client",
   ]);
+  if (!rawId) return [];
+  const id = await resolveToDatabase(rawId);
   if (!id) return [];
   return queryDatabase(id);
 }
