@@ -17,9 +17,16 @@ interface Gallery {
 
 interface Props {
   galleries: Gallery[];
+  idToSlug: Record<string, string>;
 }
 
-export function NotionPortfolio({ galleries }: Props) {
+export function NotionPortfolio({ galleries, idToSlug }: Props) {
+  const mapPageUrl = (pageId: string) => {
+    const clean = pageId.replace(/-/g, "");
+    const slug = idToSlug[clean];
+    return slug ? `/portfolio/${slug}` : `/portfolio`;
+  };
+
   return (
     <div className="space-y-12">
       {galleries.map((g) => (
@@ -31,6 +38,7 @@ export function NotionPortfolio({ galleries }: Props) {
               fullPage={false}
               darkMode={false}
               disableHeader
+              mapPageUrl={mapPageUrl}
               components={{
                 Collection: (props: any) => (
                   <Suspense fallback={null}>

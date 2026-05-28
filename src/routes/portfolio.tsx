@@ -36,10 +36,12 @@ export const Route = createFileRoute("/portfolio")({
 
 function PortfolioPage() {
   const fetchGalleries = useServerFn(getGalleryRecordMaps);
-  const { data: galleries = [], isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["portfolio-galleries"],
     queryFn: () => fetchGalleries(),
   });
+  const galleries = data?.galleries ?? [];
+  const idToSlug = data?.idToSlug ?? {};
 
   return (
     <SiteLayout>
@@ -82,7 +84,7 @@ function PortfolioPage() {
           <p className="px-6 text-center text-muted-foreground">Impossible de charger le portfolio.</p>
         ) : (
           <Suspense fallback={<p className="px-6 text-center text-muted-foreground">Chargement...</p>}>
-            <NotionPortfolio galleries={galleries} />
+            <NotionPortfolio galleries={galleries} idToSlug={idToSlug} />
           </Suspense>
         )}
       </section>
