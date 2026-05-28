@@ -1,11 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { lazy, Suspense } from "react";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { NewsletterCTA } from "@/components/site/NewsletterCTA";
 import { LogosMarquee } from "@/components/site/LogosMarquee";
-import { getPortfolioSections } from "@/lib/notion.functions";
-import type { PortfolioSection } from "@/lib/notion.server";
+import { getGalleryRecordMaps } from "@/lib/notion.functions";
+
+const NotionPortfolio = lazy(() =>
+  import("@/components/site/NotionPortfolio").then((m) => ({ default: m.NotionPortfolio }))
+);
 
 export const Route = createFileRoute("/portfolio")({
   component: PortfolioPage,
@@ -31,10 +35,10 @@ export const Route = createFileRoute("/portfolio")({
 });
 
 function PortfolioPage() {
-  const fetchSections = useServerFn(getPortfolioSections);
-  const { data: sections = [], isLoading } = useQuery({
-    queryKey: ["portfolio-sections"],
-    queryFn: () => fetchSections(),
+  const fetchGalleries = useServerFn(getGalleryRecordMaps);
+  const { data: galleries = [], isLoading } = useQuery({
+    queryKey: ["portfolio-galleries"],
+    queryFn: () => fetchGalleries(),
   });
 
   return (
@@ -70,18 +74,16 @@ function PortfolioPage() {
         </div>
       </section>
 
-      {/* Mobile : 2 galeries Notion via API officielle */}
-      <section className="px-6 pb-16 md:hidden">
+      {/* Mobile : galeries Notion via API non-officielle (react-notion-x) */}
+      <section className="pb-16 md:hidden">
         {isLoading ? (
-          <p className="text-center text-muted-foreground">Chargement...</p>
-        ) : sections.length === 0 ? (
-          <p className="text-center text-muted-foreground">Impossible de charger le portfolio.</p>
+          <p className="px-6 text-center text-muted-foreground">Chargement...</p>
+        ) : galleries.length === 0 ? (
+          <p className="px-6 text-center text-muted-foreground">Impossible de charger le portfolio.</p>
         ) : (
-          <div className="mx-auto max-w-5xl space-y-12">
-            {sections.map((section) => (
-              <PortfolioGallery key={section.title} section={section} />
-            ))}
-          </div>
+          <Suspense fallback={<p className="px-6 text-center text-muted-foreground">Chargement...</p>}>
+            <NotionPortfolio galleries={galleries} />
+          </Suspense>
         )}
       </section>
 
