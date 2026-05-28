@@ -16,20 +16,36 @@ export const Route = createFileRoute("/api/notion-test")({
         });
         const meData = await meRes.json();
 
-        const dbRes = await fetch(`https://api.notion.com/v1/databases/${dbId}/query`, {
-          method: "POST",
-          headers: { Authorization: `Bearer ${key}`, "Notion-Version": "2022-06-28", "Content-Type": "application/json" },
-          body: JSON.stringify({ page_size: 3 }),
+        // Récupère les blocs de la page pour trouver la child_database
+        const blocksRes = await fetch(`https://api.notion.com/v1/blocks/${dbId}/children?page_size=50`, {
+          headers: { Authorization: `Bearer ${key}`, "Notion-Version": "2022-06-28" },
         });
-        const dbData = await dbRes.json();
+        const blocksData = await blocksRes.json();
+        const childDb = blocksData?.results?.find((b: any) => b.type === "child_database");
+        const childDbId = childDb?.id;
+
+        // Query la child_database si trouvée
+        let items: any[] = [];
+        if (childDbId) {
+          const qRes = await fetch(`https://api.notion.com/v1/databases/${childDbId}/query`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${key}`, "Notion-Version": "2022-06-28", "Content-Type": "application/json" },
+            body: JSON.stringify({ page_size: 2 }),
+          });
+          const qData = await qRes.json();
+          items = qData?.results?.map((p: any) => ({
+            id: p.id,
+            cover: p.cover,
+            properties_keys: Object.keys(p.properties || {}),
+            first_prop: Object.values(p.properties || {})[0],
+          })) || [];
+        }
 
         return new Response(JSON.stringify({
-          token_prefix: key.slice(0, 10) + "...",
-          db_id: dbId,
-          auth_status: meRes.status,
           auth_ok: meData?.object === "user" ? "✅ token valide" : "❌ token invalide",
-          db_status: dbRes.status,
-          db_result: dbData,
+          child_database_id: childDbId || "❌ pas trouvé",
+          blocks_types: blocksData?.results?.map((b: any) => b.type),
+          items_sample: items,
         }, null, 2), { headers: { "Content-Type": "application/json" } });
       },
     },
