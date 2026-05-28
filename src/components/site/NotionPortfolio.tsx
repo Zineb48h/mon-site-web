@@ -23,8 +23,7 @@ interface Props {
 export function NotionPortfolio({ galleries, idToSlug }: Props) {
   const mapPageUrl = (pageId: string) => {
     const clean = pageId.replace(/-/g, "");
-    const slug = idToSlug[clean];
-    return slug ? `/portfolio/${slug}` : `/portfolio`;
+    return `/portfolio/${clean}`;
   };
 
   return (
@@ -44,6 +43,12 @@ export function NotionPortfolio({ galleries, idToSlug }: Props) {
                   <Suspense fallback={null}>
                     <Collection {...props} />
                   </Suspense>
+                ),
+                Link: ({ href, children, ...props }: any) => (
+                  <a href={href} {...props}>{children}</a>
+                ),
+                PageLink: ({ href, children, ...props }: any) => (
+                  <a href={href} {...props}>{children}</a>
                 ),
               }}
             />
