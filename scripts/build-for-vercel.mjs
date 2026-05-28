@@ -1,48 +1,125 @@
 /**
  * Post-build script : transforme la sortie Vite en Vercel Build Output API
  *
- *  dist/client/  -> .vercel/output/static/       (assets statiques)
- *  dist/server/  -> .vercel/output/functions/render.func/  (Edge Function SSR)
+ *  dist/client/  -> .vercel/output/static/        (assets statiques)
+ *  dist/server/  -> bundle Node.js serverless      (SSR — runtime nodejs20.x)
+ *
+ * On utilise Node.js (pas Edge) car TanStack Start dépend de
+ * node:async_hooks / node:stream qui ne sont pas dispo en Edge runtime.
+ * esbuild bundle tout (react, tanstack…) en un seul fichier CJS.
  */
 
 import fs from "fs";
 import path from "path";
+import { execSync } from "child_process";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
 const out = path.join(root, ".vercel", "output");
+const funcDir = path.join(out, "functions", "render.func");
 
 // ── 1. Nettoyer et créer la structure ──────────────────────────────────────
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(path.join(out, "static"), { recursive: true });
-fs.mkdirSync(path.join(out, "functions", "render.func"), { recursive: true });
+fs.mkdirSync(funcDir, { recursive: true });
 
 // ── 2. Assets statiques ────────────────────────────────────────────────────
 copyDir(path.join(root, "dist", "client"), path.join(out, "static"));
 console.log("✓ Assets statiques copiés");
 
-// ── 3. Fichiers serveur → Edge Function ───────────────────────────────────
-copyDir(
-  path.join(root, "dist", "server"),
-  path.join(out, "functions", "render.func"),
-);
-console.log("✓ Bundle serveur copié");
-
-// ── 4. Wrapper Edge Function ───────────────────────────────────────────────
+// ── 3. Wrapper Node.js HTTP → Web Request API ─────────────────────────────
+//  Vercel Node.js functions reçoivent (req, res) ; TanStack Start parle
+//  Web Request API. On adapte et on bundle tout ensemble.
+const wrapperPath = path.join(root, "dist", "server", "__vercel_node.cjs");
 fs.writeFileSync(
-  path.join(out, "functions", "render.func", "index.js"),
-  `import server from './server.js';
-export default function handler(request) {
-  return server.fetch(request, {}, {});
-}
+  wrapperPath,
+  `
+"use strict";
+const serverModule = require('./server.js');
+const server = serverModule.default ?? serverModule;
+
+module.exports = async function handler(req, res) {
+  try {
+    const protocol = req.headers["x-forwarded-proto"] || "https";
+    const host = req.headers["x-forwarded-host"] || req.headers.host || "localhost";
+    const url = new URL(req.url, \`\${protocol}://\${host}\`);
+
+    const headers = new Headers();
+    for (const [k, v] of Object.entries(req.headers)) {
+      if (v == null) continue;
+      if (Array.isArray(v)) v.forEach((val) => headers.append(k, val));
+      else headers.set(k, v);
+    }
+
+    let body;
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      body = await new Promise((resolve, reject) => {
+        const chunks = [];
+        req.on("data", (c) => chunks.push(c));
+        req.on("end", () => resolve(Buffer.concat(chunks)));
+        req.on("error", reject);
+      });
+    }
+
+    const webReq = new Request(url.toString(), {
+      method: req.method,
+      headers,
+      body: body && body.length > 0 ? body : undefined,
+      duplex: "half",
+    });
+
+    const webRes = await server.fetch(webReq, {}, {});
+
+    res.statusCode = webRes.status;
+    for (const [k, v] of webRes.headers.entries()) {
+      res.setHeader(k, v);
+    }
+
+    const buf = Buffer.from(await webRes.arrayBuffer());
+    res.end(buf);
+  } catch (err) {
+    console.error(err);
+    res.statusCode = 500;
+    res.end("Internal Server Error");
+  }
+};
 `,
 );
 
-// ── 5. Config de la fonction ───────────────────────────────────────────────
+// ── 4. Bundle avec esbuild (Node.js, CommonJS) ────────────────────────────
+const outFile = path.join(funcDir, "index.js");
+
+execSync(
+  [
+    `"node_modules/.bin/esbuild"`,
+    `"${wrapperPath}"`,
+    `--bundle`,
+    `--platform=node`,
+    `--format=cjs`,
+    `--target=node20`,
+    `"--outfile=${outFile}"`,
+    `--log-level=warning`,
+  ].join(" "),
+  { cwd: root, stdio: "inherit" },
+);
+
+fs.rmSync(wrapperPath, { force: true });
+console.log("✓ Serverless Function Node.js bundlée");
+
+// ── 5. Config de la fonction (Node.js runtime) ────────────────────────────
 fs.writeFileSync(
-  path.join(out, "functions", "render.func", ".vc-config.json"),
-  JSON.stringify({ runtime: "edge", entrypoint: "index.js" }, null, 2),
+  path.join(funcDir, ".vc-config.json"),
+  JSON.stringify(
+    {
+      runtime: "nodejs20.x",
+      handler: "index.js",
+      launcherType: "Nodejs",
+      shouldAddHelpers: false,
+    },
+    null,
+    2,
+  ),
 );
 
 // ── 6. Routes Vercel ──────────────────────────────────────────────────────
@@ -52,15 +129,12 @@ fs.writeFileSync(
     {
       version: 3,
       routes: [
-        // Cache long pour les assets hachés
         {
           src: "^/assets/(.*)$",
           headers: { "cache-control": "public, max-age=31536000, immutable" },
           continue: true,
         },
-        // Sert les fichiers statiques s'ils existent
         { handle: "filesystem" },
-        // Tout le reste → SSR Edge Function
         { src: "/(.*)", dest: "/render" },
       ],
     },
