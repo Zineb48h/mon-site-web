@@ -1,3 +1,4 @@
+import React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/SiteLayout";
 import { NewsletterCTA } from "@/components/site/NewsletterCTA";
@@ -48,15 +49,19 @@ function PortfolioPage() {
 
       <section className="px-6 pb-16">
         <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] border border-border bg-card shadow-sm">
-          <iframe
-            src="https://zineb-socialmediamanager.notion.site/ebd/25752149dfd180348155cdbb9cfbd6ff"
-            title="Portfolio Notion"
-            width="100%"
-            height="600"
-            className="block h-[1200px] w-full"
-            loading="lazy"
-            allowFullScreen
-          />
+          <div
+            className="h-[80vh] overflow-y-auto overscroll-contain"
+            style={{ WebkitOverflowScrolling: "touch" } as React.CSSProperties}
+          >
+            <iframe
+              src="https://zineb-socialmediamanager.notion.site/ebd/25752149dfd180348155cdbb9cfbd6ff"
+              title="Portfolio Notion"
+              width="100%"
+              className="block h-[1200px] w-full border-0"
+              loading="lazy"
+              allowFullScreen
+            />
+          </div>
         </div>
       </section>
 
