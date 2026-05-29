@@ -24,11 +24,28 @@ const PILLARS = [
   },
 ];
 
+const SOCIALS = [
+  {
+    icon: FaLinkedin,
+    href: "https://www.linkedin.com/in/zinebrais/",
+    label: "LinkedIn",
+  },
+  {
+    icon: FaInstagram,
+    href: "https://www.instagram.com/studio.social_/",
+    label: "Instagram",
+  },
+  {
+    icon: FaTiktok,
+    href: "https://www.tiktok.com/@studio.social_",
+    label: "TikTok",
+  },
+];
+
 export function AboutSnippet() {
   return (
     <section className="px-6 py-24">
       <div className="mx-auto max-w-6xl">
-        {/* Label */}
         <p className="mb-6 font-mono text-xs uppercase tracking-widest text-muted-foreground">
           (03) qui suis-je
         </p>
@@ -42,14 +59,14 @@ export function AboutSnippet() {
             </h2>
 
             <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
-              Social media manager freelance, j'accompagne les indépendants,
-              entrepreneurs et dirigeant·es dans la gestion{" "}
+              Ghostwriter LinkedIn & Social Media Manager freelance, j'accompagne
+              les indépendants, entrepreneurs et dirigeantes dans la gestion{" "}
               <strong className="text-foreground font-semibold">stratégique</strong>{" "}
               de leurs réseaux sociaux.
             </p>
 
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
-              LinkedIn, Instagram, TikTok — avec un objectif clair : booster ta
+              LinkedIn, Instagram, TikTok avec un objectif clair : booster ta
               visibilité, renforcer ton positionnement et attirer{" "}
               <strong className="text-foreground font-semibold">
                 les bonnes opportunités
@@ -59,18 +76,27 @@ export function AboutSnippet() {
 
             <p className="mt-4 text-lg leading-relaxed text-muted-foreground">
               Mon approche est globale : stratégie, contenu, personal branding,
-              community management — tout est pensé pour faire{" "}
+              community management, tout est pensé pour faire{" "}
               <span className="font-serif italic text-primary">
                 rayonner ton projet
               </span>{" "}
               là où ton audience se trouve.
             </p>
 
-            {/* Plateformes */}
-            <div className="mt-8 flex items-center gap-4">
-              <FaLinkedin className="text-2xl text-foreground/60 hover:text-primary transition-colors" />
-              <FaInstagram className="text-2xl text-foreground/60 hover:text-primary transition-colors" />
-              <FaTiktok className="text-2xl text-foreground/60 hover:text-primary transition-colors" />
+            {/* Liens réseaux sociaux */}
+            <div className="mt-8 flex items-center gap-5">
+              {SOCIALS.map(({ icon: Icon, href, label }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="text-2xl text-foreground/60 transition-colors hover:text-primary"
+                >
+                  <Icon />
+                </a>
+              ))}
             </div>
 
             {/* CTAs */}
@@ -92,7 +118,7 @@ export function AboutSnippet() {
             </div>
           </div>
 
-          {/* Colonne droite — pilliers */}
+          {/* Colonne droite — piliers */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {PILLARS.map((p) => (
               <div

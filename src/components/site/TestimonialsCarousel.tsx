@@ -125,7 +125,7 @@ export function TestimonialsCarousel() {
       <div className="mx-auto max-w-4xl">
         <div className="mb-12 text-center">
           <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-            (03) ils en parlent mieux que moi
+            (04) ils en parlent mieux que moi
           </p>
           <h2 className="font-display text-4xl font-bold md:text-5xl">
             Ce qu'ils <span className="font-serif italic text-primary">disent</span>
