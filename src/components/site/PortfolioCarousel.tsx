@@ -56,22 +56,14 @@ export function PortfolioCarousel() {
   return (
     <section className="px-6 py-24">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-16 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-          <div>
-            <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
-              (02) derniers projets
-            </p>
-            <h2 className="font-display text-4xl font-bold md:text-5xl">
-              Mes clients en{" "}
-              <span className="font-serif italic text-primary">vedette</span>
-            </h2>
-          </div>
-          <Link
-            to="/portfolio"
-            className="shrink-0 inline-flex items-center justify-center rounded-full border-2 border-foreground px-8 py-3 font-display font-bold transition-colors hover:bg-foreground hover:text-card"
-          >
-            Découvrir tout le portfolio
-          </Link>
+        <div className="mb-16">
+          <p className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">
+            (02) derniers projets
+          </p>
+          <h2 className="font-display text-4xl font-bold md:text-5xl">
+            Mes clients en{" "}
+            <span className="font-serif italic text-primary">vedette</span>
+          </h2>
         </div>
 
         <div className="-mx-2 overflow-hidden px-2">
@@ -137,6 +129,12 @@ export function PortfolioCarousel() {
               />
             ))}
           </div>
+          <Link
+            to="/portfolio"
+            className="shrink-0 inline-flex items-center justify-center rounded-full border-2 border-foreground px-6 py-2.5 font-display text-sm font-bold transition-colors hover:bg-foreground hover:text-card"
+          >
+            Découvrir tout le portfolio
+          </Link>
         </div>
       </div>
     </section>

@@ -187,7 +187,7 @@ function Index() {
                     to="/contact"
                     className="rounded-2xl bg-primary px-8 py-4 font-display text-lg font-bold text-primary-foreground transition-all hover:scale-105 hover:shadow-lg"
                   >
-                    Lancer mon projet
+                    Je veux discuter de mon projet
                   </Link>
                   <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                     Appel découverte gratuit · 30 min
