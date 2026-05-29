@@ -98,7 +98,8 @@ const OFFERS = [
       "Suivi des KPI & reporting mensuel détaillé",
       "Modération des commentaires et DM",
     ],
-    icons: [FaInstagram, FaTiktok],
+    topBadge: "Multi-plateformes",
+    icons: [FaInstagram, FaTiktok, FaLinkedin],
     badge3mois: true,
     bg: "bg-tint-peach",
     rotate: "rotate-[1deg]",
@@ -111,6 +112,7 @@ const OFFERS = [
     title: "Gestion des Ads Meta",
     price: "À partir de 500 € / mois",
     desc: "Je gère tout pour toi : de la stratégie jusqu'au lancement et à l'optimisation.",
+    topBadge: "ROI mesurable",
     badgeHorsBudget: true,
     bullets: [
       "Création et gestion des campagnes Meta (Facebook & Instagram)",
@@ -138,6 +140,7 @@ const OFFERS = [
   border: string;
   shadow: string;
   highlight?: boolean;
+  topBadge?: string;
   badge3mois?: boolean;
   badgeHorsBudget?: boolean;
   calendlyUrl?: string;
@@ -277,6 +280,11 @@ function ServicesPage() {
                 {o.highlight && (
                   <span className="absolute -top-3 right-6 rounded-full bg-foreground px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-card">
                     Le + demandé
+                  </span>
+                )}
+                {o.topBadge && (
+                  <span className="absolute -top-3 right-6 rounded-full bg-foreground px-3 py-1 font-mono text-[10px] uppercase tracking-widest text-card">
+                    {o.topBadge}
                   </span>
                 )}
                 <div className="mb-4 flex gap-2">
