@@ -4,6 +4,7 @@ import { SiteLayout } from "@/components/site/SiteLayout";
 import { NewsletterCTA } from "@/components/site/NewsletterCTA";
 import { TestimonialsCarousel } from "@/components/site/TestimonialsCarousel";
 import { PortfolioCarousel } from "@/components/site/PortfolioCarousel";
+import { AboutSnippet } from "@/components/site/AboutSnippet";
 import { LogosMarquee } from "@/components/site/LogosMarquee";
 import photoProSrc from "@/assets/Photo pro zineb V2.png";
 import statSrc from "@/assets/stat.png";
@@ -355,6 +356,8 @@ function Index() {
       <LogosMarquee />
 
       <PortfolioCarousel />
+
+      <AboutSnippet />
 
       <TestimonialsCarousel />
 
