@@ -138,7 +138,7 @@ function Index() {
               <div className="text-center">
                 <span className="mb-6 lg:-mt-24 lg:mb-14 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 font-mono text-xs uppercase tracking-widest text-muted-foreground">
                   <span className="size-1.5 animate-pulse rounded-full bg-primary" />
-                  Social Media Manager · freelance
+                  Ghostwriter LinkedIn & Social Media Manager · freelance
                 </span>
               </div>
 
