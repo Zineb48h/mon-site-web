@@ -94,12 +94,11 @@ export function AboutSnippet() {
 
           {/* Colonne droite — photo */}
           <div className="flex items-center justify-center lg:justify-end">
-            <div className="animate-float [animation-delay:0.8s] rotate-[3deg]">
+            <div className="animate-float [animation-delay:0.8s] rotate-[3deg] overflow-hidden rounded-3xl shadow-xl outline outline-4 outline-card w-80 md:w-96 lg:w-[26rem]">
               <img
                 src={photoDeboutSrc}
                 alt="Zineb Rais — Ghostwriter LinkedIn & Social Media Manager"
-                className="w-72 md:w-80 lg:w-96"
-                style={{ clipPath: "inset(0% 0% 0% 0% round 2.5rem)" }}
+                className="w-full h-auto object-cover"
               />
             </div>
           </div>
