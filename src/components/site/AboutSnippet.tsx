@@ -1,28 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { FaLinkedin, FaInstagram } from "react-icons/fa6";
+import photoDeboutSrc from "@/assets/zineb rais photo debout.png";
 
-const PILLARS = [
-  {
-    emoji: "🎯",
-    label: "Stratégie",
-    desc: "Chaque action est pensée pour ton objectif, pas pour remplir un planning.",
-  },
-  {
-    emoji: "✍️",
-    label: "Création de contenu",
-    desc: "Des posts qui te ressemblent, qui engagent et qui convertissent.",
-  },
-  {
-    emoji: "👤",
-    label: "Personal branding",
-    desc: "Ton image, ton positionnement, ta voix — cohérents partout.",
-  },
-  {
-    emoji: "🤝",
-    label: "Community management",
-    desc: "Une communauté qui s'engage, pas juste des followers qui scrollent.",
-  },
-];
 
 const SOCIALS = [
   {
@@ -113,20 +92,16 @@ export function AboutSnippet() {
             </div>
           </div>
 
-          {/* Colonne droite — piliers */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {PILLARS.map((p) => (
-              <div
-                key={p.label}
-                className="rounded-2xl border border-border bg-card p-5 transition-transform hover:-translate-y-1"
-              >
-                <span className="text-2xl">{p.emoji}</span>
-                <p className="mt-3 font-display text-base font-bold">{p.label}</p>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  {p.desc}
-                </p>
-              </div>
-            ))}
+          {/* Colonne droite — photo */}
+          <div className="flex items-center justify-center lg:justify-end">
+            <div className="animate-float [animation-delay:0.8s] rotate-[3deg]">
+              <img
+                src={photoDeboutSrc}
+                alt="Zineb Rais — Ghostwriter LinkedIn & Social Media Manager"
+                className="w-72 md:w-80 lg:w-96"
+                style={{ clipPath: "inset(0% 0% 0% 0% round 2.5rem)" }}
+              />
+            </div>
           </div>
         </div>
       </div>
