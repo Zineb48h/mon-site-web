@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { FaLinkedin, FaInstagram } from "react-icons/fa6";
-import photoDeboutSrc from "@/assets/zineb rais photo debout.png";
+import photoDeboutSrc from "@/assets/zineb-rais-photo-debout.png";
 
 
 const SOCIALS = [
