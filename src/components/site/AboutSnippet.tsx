@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { FaLinkedin, FaInstagram, FaTiktok } from "react-icons/fa6";
+import { FaLinkedin, FaInstagram } from "react-icons/fa6";
 
 const PILLARS = [
   {
@@ -27,18 +27,13 @@ const PILLARS = [
 const SOCIALS = [
   {
     icon: FaLinkedin,
-    href: "https://www.linkedin.com/in/zinebrais/",
+    href: "https://www.linkedin.com/in/zinebrais-brandcontentmanager/",
     label: "LinkedIn",
   },
   {
     icon: FaInstagram,
-    href: "https://www.instagram.com/studio.social_/",
+    href: "https://www.instagram.com/zr_socialmedia/",
     label: "Instagram",
-  },
-  {
-    icon: FaTiktok,
-    href: "https://www.tiktok.com/@studio.social_",
-    label: "TikTok",
   },
 ];
 
